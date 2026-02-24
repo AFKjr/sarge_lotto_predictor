@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pick 3 Lotto Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Sarge's Pick 3 Analyzer</h1>
+    </header>
+
+    <main>
+        <section id="probability-calculator">
+            <h2>Probability Calculator</h2>
+
+            <div id="bet-type-selector">
+                <label for=""bet-type">Bet Type</label>
+                <select id="bet-type">
+                    <option value=""straight">Straight (exact order)</option>
+                    <option value="box-different">Box - All different digits</option>
+                    <option value="box-pair">Box - One pair</option>
+                </select>
+            </div>
+
+            <div id="plays-input">
+                <label for="number-of-plays">Number of plays</label>
+                <input type="number" id="number-of-plays" min="1" value="1">
+            </div>
+
+            <button type="button" id="calculate-button">Calculate</button>
+
+            <div id="result">
+                <p id="single-draw-odds"></p>
+                <p id="cumulative-probability"></p>
+                <p id="plays-to-fifty"></p>
+            </div>
+
+        </section>
+    </main>
+    
+    <script src="main.js"></script>
+</body>
+</html>
