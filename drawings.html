@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pick 3 Drawings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Sarge's Pick 3 Analyzer</h1>
+    </header>
+
+    <nav>
+        <a href="index.html">Calculator</a>
+        <a href="drawings.html" class="active">Drawings</a>
+        <a href="stats.html">Stats</a>
+    </nav>
+
+    <main>
+        <section id="drawings-section">
+            <h2>Drawings</h2>
+
+            <div id="add-drawing">
+                <div id="drawing-number-input">
+                    <label for="drawing-number">Number</label>
+                    <input type="text" id="drawing-number" maxlength="3" placeholder="e.g. 378">
+                </div>
+
+                <div id="drawing-date-input">
+                    <label for="drawing-date">Date</label>
+                    <input type="date" id="drawing-date">
+                </div>
+
+                <p id="drawings-error"></p>
+
+                <button type="button" id="add-drawing-button">Add Drawing</button>
+            </div>
+
+            <div id="drawing-actions">
+                <button type="button" id="export-button">Export JSON</button>
+                <label for="import-file" id="import-label">Import JSON</label>
+                <input type="file" id="import-file" accept=".json">
+            </div>
+
+            <div id="drawings-list"></div>
+
+        </section>
+    </main>
+
+    <script src="drawings.js"></script>
+</body>
+</html>

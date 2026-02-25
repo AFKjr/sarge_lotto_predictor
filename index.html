@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pick 3 Lotto Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,22 +14,38 @@
         <h1>Sarge's Pick 3 Analyzer</h1>
     </header>
 
+    <nav>
+        <a href="index.html" class="active">Calculator</a>
+        <a href="drawings.html">Drawings</a>
+        <a href="stats.html">Stats</a>
+    </nav>
+
     <main>
         <section id="probability-calculator">
             <h2>Probability Calculator</h2>
 
             <div id="bet-type-selector">
-                <label for=""bet-type">Bet Type</label>
+                <label for="bet-type">Bet Type</label>
                 <select id="bet-type">
-                    <option value=""straight">Straight (exact order)</option>
+                    <option value="straight">Straight (exact order)</option>
                     <option value="box-different">Box - All different digits</option>
                     <option value="box-pair">Box - One pair</option>
                 </select>
             </div>
 
+            <div id="number-input">
+                <label for="picked-number">Your number (optional)</label>
+                <input type="text" id="picked-number" maxlength="3" placeholder="e.g. 378">
+            </div>
+
             <div id="plays-input">
                 <label for="number-of-plays">Number of plays</label>
                 <input type="number" id="number-of-plays" min="1" value="1">
+            </div>
+
+            <div id="ticket-cost-input">
+                <label for="ticket-cost">Ticket cost ($)</label>
+                <input type="number" id="ticket-cost" min="0.01" step="0.01" value="1">
             </div>
 
             <button type="button" id="calculate-button">Calculate</button>
@@ -35,6 +54,7 @@
                 <p id="single-draw-odds"></p>
                 <p id="cumulative-probability"></p>
                 <p id="plays-to-fifty"></p>
+                <p id="expected-loss"></p>
             </div>
 
         </section>
