@@ -197,13 +197,7 @@ function handlePdfImport(event) {
             }
             return Promise.all(pagePromises);
         }).then(function(pages) {
-            const textItems = [];
-            for (let i = 0; i < pages.length; i++) {
-                for (let j = 0; j < pages[i].items.length; j++) {
-                    textItems.push(pages[i].items[j].str);
-                }
-            }
-            const parsed = parseCash3Pdf(textItems);
+            const parsed = parseCash3Pdf(pages);
             if (parsed.length === 0) {
                 showError("No drawings found in PDF. Make sure it is a GA Lottery Cash 3 results PDF.");
                 return;
@@ -220,85 +214,138 @@ function handlePdfImport(event) {
             saveDrawings(drawings);
             renderDrawings(drawings);
             clearError();
-            showSuccess(added + " drawing" + (added === 1 ? "" : "s") + " imported from PDF.");
+            if (added === 0) {
+                showSuccess("PDF parsed — all " + parsed.length + " drawing" + (parsed.length === 1 ? "" : "s") + " already exist.");
+            } else {
+                showSuccess(added + " drawing" + (added === 1 ? "" : "s") + " imported from PDF.");
+            }
         }).catch(function() {
             showError("Failed to read PDF file.");
         });
         event.target.value = "";
     };
+    reader.onerror = function() {
+        showError("Failed to read file.");
+        event.target.value = "";
+    };
     reader.readAsArrayBuffer(file);
 }
 
-function parseCash3Pdf(textItems) {
-    const results = [];
-    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+function parseCash3Pdf(pages) {
+    // PDF y-coordinates are page-relative, so each page must be processed independently.
+    // Mixing all pages into one array causes items from different pages at the same
+    // y-coordinate to be grouped into the same row, breaking pattern matching.
+    const Y_TOLERANCE = 5;
+    const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
     const drawRegex = /^(Midday|Evening|Night)$/i;
+    const results = [];
 
-    let i = 0;
-    while (i < textItems.length) {
-        const item = textItems[i].trim();
-
-        if (!dateRegex.test(item)) {
-            i++;
-            continue;
+    for (let p = 0; p < pages.length; p++) {
+        // Collect text items with coordinates for this page only
+        const pageItems = [];
+        for (let j = 0; j < pages[p].items.length; j++) {
+            const item = pages[p].items[j];
+            const str = item.str.trim();
+            if (str === "") continue;
+            pageItems.push({
+                str: str,
+                x: item.transform[4],
+                y: item.transform[5]
+            });
         }
 
-        const date = formatDateFromMDY(item);
-
-        // Find next non-empty item — should be draw type
-        let j = i + 1;
-        while (j < textItems.length && textItems[j].trim() === "") {
-            j++;
-        }
-        if (j >= textItems.length || !drawRegex.test(textItems[j].trim())) {
-            i++;
-            continue;
-        }
-        const draw = normalizeDrawTime(textItems[j].trim());
-
-        // Find the winning number — "2 1 3" as one item, or "2","1","3" as separate items
-        let k = j + 1;
-        while (k < textItems.length && textItems[k].trim() === "") {
-            k++;
-        }
-        if (k >= textItems.length) {
-            i++;
-            continue;
-        }
-
-        let number = "";
-        const nextItem = textItems[k].trim();
-        const combinedMatch = nextItem.match(/^(\d)\s+(\d)\s+(\d)$/);
-
-        if (combinedMatch) {
-            number = combinedMatch[1] + combinedMatch[2] + combinedMatch[3];
-            i = k + 1;
-        } else if (/^\d$/.test(nextItem)) {
-            const digits = [nextItem];
-            let m = k + 1;
-            while (m < textItems.length && digits.length < 3) {
-                const d = textItems[m].trim();
-                if (/^\d$/.test(d)) {
-                    digits.push(d);
-                } else if (d !== "") {
+        // Group items into rows by y-coordinate within this page
+        const rowMap = {};
+        for (let i = 0; i < pageItems.length; i++) {
+            const y = pageItems[i].y;
+            let matched = null;
+            const keys = Object.keys(rowMap);
+            for (let k = 0; k < keys.length; k++) {
+                if (Math.abs(parseFloat(keys[k]) - y) <= Y_TOLERANCE) {
+                    matched = keys[k];
                     break;
                 }
-                m++;
             }
-            if (digits.length === 3) {
-                number = digits.join("");
-                i = m;
-            } else {
-                i++;
-                continue;
+            if (matched === null) {
+                rowMap[y.toString()] = [];
+                matched = y.toString();
             }
-        } else {
-            i++;
-            continue;
+            rowMap[matched].push(pageItems[i]);
         }
 
-        if (draw === "evening") {
-            results.push({ number: number, date: date, draw: draw });
+        // Sort rows top-to-bottom (descending y = top of page first in PDF coords)
+        const rowKeys = Object.keys(rowMap).sort(function(a, b) {
+            return parseFloat(b) - parseFloat(a);
+        });
+
+        for (let r = 0; r < rowKeys.length; r++) {
+            // Sort each row left-to-right by x-coordinate
+            const row = rowMap[rowKeys[r]].sort(function(a, b) { return a.x - b.x; });
+
+            if (row.length < 3) continue;
+
+            // The GA Lottery PDF renders dates as three separate text items:
+            //   '02/'  '25/'  '2026'
+            // rather than one combined '02/25/2026' string.
+            // Handle both the split form and any future combined form.
+            const monthPartRe = /^\d{1,2}\/$/;
+            const dayPartRe   = /^\d{1,2}\/$/;
+            const yearPartRe  = /^\d{4}$/;
+
+            let dateStr = null;
+            let dateEndIndex = 0;
+
+            if (dateRegex.test(row[0].str)) {
+                // Combined form: '02/25/2026'
+                dateStr = row[0].str;
+                dateEndIndex = 0;
+            } else if (
+                row.length >= 3 &&
+                monthPartRe.test(row[0].str) &&
+                dayPartRe.test(row[1].str) &&
+                yearPartRe.test(row[2].str)
+            ) {
+                // Split form: '02/' + '25/' + '2026'
+                dateStr = row[0].str + row[1].str + row[2].str;
+                dateEndIndex = 2;
+            }
+
+            if (!dateStr) continue;
+
+            const date = formatDateFromMDY(dateStr);
+
+            // Scan for draw time starting after the last date item.
+            let drawIndex = -1;
+            let draw = "";
+            for (let j = dateEndIndex + 1; j < row.length; j++) {
+                if (drawRegex.test(row[j].str)) {
+                    drawIndex = j;
+                    draw = normalizeDrawTime(row[j].str);
+                    break;
+                }
+            }
+            if (drawIndex === -1) continue;
+
+            // Collect digits starting immediately after the draw time column.
+            // Handles "2 1 3" as one combined item or as three separate single-digit items.
+            const digits = [];
+            for (let j = drawIndex + 1; j < row.length && digits.length < 3; j++) {
+                const combinedMatch = row[j].str.match(/^(\d)\s*(\d)\s*(\d)$/);
+                if (combinedMatch) {
+                    digits.push(combinedMatch[1], combinedMatch[2], combinedMatch[3]);
+                    break;
+                } else if (/^\d$/.test(row[j].str)) {
+                    digits.push(row[j].str);
+                } else {
+                    break;
+                }
+            }
+
+            if (digits.length !== 3) continue;
+
+            if (draw === "evening") {
+                results.push({ number: digits.join(""), date: date, draw: draw });
+            }
         }
     }
 
