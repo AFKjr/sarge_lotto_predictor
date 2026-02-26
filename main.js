@@ -28,6 +28,12 @@ function handleCalculation() {
         return;
     }
 
+    if (!isValidTicketCost(ticketCost)) {
+        clearResults(singleDrawOddsDisplay, cumulativeProbabilityDisplay, playsToFiftyDisplay, expectedLossDisplay);
+        singleDrawOddsDisplay.textContent = "Please enter a valid ticket cost (must be greater than 0).";
+        return;
+    }
+
     const resolvedBetType = resolveBetType(betType, pickedNumber);
 
     if (resolvedBetType === "box-same") {
@@ -56,6 +62,12 @@ function clearResults() {
 
 function formatOddsAsRatio(odds) {
     return "1 in " + Math.round(1 / odds).toLocaleString();
+}
+
+function isValidTicketCost(ticketCost) {
+    if (isNaN(ticketCost)) return false;
+    if (ticketCost <= 0) return false;
+    return true;
 }
 
 function isValidInput(numberOfPlays) {

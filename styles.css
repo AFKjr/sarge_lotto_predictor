@@ -183,6 +183,24 @@ select option {
     gap: calc(var(--spacing-unit) * 2);
 }
 
+#add-drawing-button {
+    width: 100%;
+    background-color: var(--color-accent);
+    color: #000000;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: calc(var(--spacing-unit) * 1.75) calc(var(--spacing-unit) * 2);
+    font-family: var(--font-main);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+#add-drawing-button:hover {
+    opacity: 0.88;
+}
+
 #drawings-error {
     font-size: 0.875rem;
     color: #ff5555;
@@ -216,6 +234,7 @@ select option {
     display: none;
 }
 
+#import-pdf-label,
 #import-label {
     flex: 1;
     display: flex;
@@ -235,8 +254,65 @@ select option {
     margin-bottom: 0;
 }
 
+#import-pdf-label:hover,
 #import-label:hover {
     border-color: var(--color-text-secondary);
+}
+
+#import-pdf-file {
+    display: none;
+}
+
+#filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 1.5);
+    padding-bottom: calc(var(--spacing-unit) * 2);
+    border-bottom: 1px solid #222;
+}
+
+#filter-draw {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 1);
+    flex-wrap: wrap;
+}
+
+.filter-button {
+    background: none;
+    border: 1px solid #333;
+    border-radius: var(--border-radius);
+    color: var(--color-text-secondary);
+    font-family: var(--font-main);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: calc(var(--spacing-unit) * 0.625) calc(var(--spacing-unit) * 1.5);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.filter-button:hover {
+    border-color: var(--color-text-secondary);
+    color: var(--color-text-primary);
+}
+
+.filter-button.active {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+#filter-date-range {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 2);
+}
+
+#filter-date-from-input,
+#filter-date-to-input {
+    flex: 1;
+}
+
+#filter-date-from-input label,
+#filter-date-to-input label {
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
 }
 
 #drawings-list {
@@ -264,6 +340,7 @@ select option {
     font-size: 1.125rem;
     color: var(--color-text-primary);
     letter-spacing: 0.1em;
+    text-decoration: none;
 }
 
 .drawing-date {
@@ -271,13 +348,32 @@ select option {
     color: var(--color-text-secondary);
 }
 
-.drawing-number {
-    text-decoration: none;
-}
-
 .drawing-number:hover {
     text-decoration: underline;
     text-decoration-color: var(--color-accent);
+}
+
+.drawing-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: calc(var(--spacing-unit) * 0.25);
+}
+
+.drawing-draw {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.drawings-error-text {
+    color: #ff5555;
+}
+
+.drawings-success-text {
+    color: var(--color-accent);
 }
 
 .drawing-item-actions {

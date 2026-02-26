@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    </script>
 </head>
 <body>
     <header>
@@ -35,6 +39,15 @@
                     <input type="date" id="drawing-date">
                 </div>
 
+                <div id="drawing-draw-input">
+                    <label for="drawing-draw">Draw</label>
+                    <select id="drawing-draw">
+                        <option value="midday">Midday</option>
+                        <option value="evening">Evening</option>
+                        <option value="night">Night</option>
+                    </select>
+                </div>
+
                 <p id="drawings-error"></p>
 
                 <button type="button" id="add-drawing-button">Add Drawing</button>
@@ -44,6 +57,27 @@
                 <button type="button" id="export-button">Export JSON</button>
                 <label for="import-file" id="import-label">Import JSON</label>
                 <input type="file" id="import-file" accept=".json">
+                <label for="import-pdf-file" id="import-pdf-label">Import PDF</label>
+                <input type="file" id="import-pdf-file" accept=".pdf">
+            </div>
+
+            <div id="filter-bar">
+                <div id="filter-draw">
+                    <button type="button" class="filter-button active" data-draw="all">All</button>
+                    <button type="button" class="filter-button" data-draw="midday">Midday</button>
+                    <button type="button" class="filter-button" data-draw="evening">Evening</button>
+                    <button type="button" class="filter-button" data-draw="night">Night</button>
+                </div>
+                <div id="filter-date-range">
+                    <div id="filter-date-from-input">
+                        <label for="filter-date-from">From</label>
+                        <input type="date" id="filter-date-from">
+                    </div>
+                    <div id="filter-date-to-input">
+                        <label for="filter-date-to">To</label>
+                        <input type="date" id="filter-date-to">
+                    </div>
+                </div>
             </div>
 
             <div id="drawings-list"></div>
