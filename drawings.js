@@ -4,7 +4,7 @@ const importFile = document.getElementById("import-file");
 const importPdfFile = document.getElementById("import-pdf-file");
 
 let editingId = null;
-let filterDraw = "all";
+let filterDraw = "evening";
 let filterDateFrom = "";
 let filterDateTo = "";
 
@@ -45,10 +45,10 @@ function handleFilterDraw(draw) {
 function handleAddDrawing() {
     const numberInput = document.getElementById("drawing-number");
     const dateInput = document.getElementById("drawing-date");
-    const drawSelect = document.getElementById("drawing-draw");
+    // const drawSelect = document.getElementById("drawing-draw");
     const number = numberInput.value.trim();
     const date = dateInput.value;
-    const draw = drawSelect.value;
+    const draw = "evening"; // const draw = drawSelect.value;
 
     if (!isValidDrawingNumber(number)) {
         showError("Please enter a valid 3-digit number.");
@@ -124,7 +124,7 @@ function handleEditDrawing(id) {
 
     document.getElementById("drawing-number").value = drawing.number;
     document.getElementById("drawing-date").value = drawing.date;
-    document.getElementById("drawing-draw").value = drawing.draw || "evening";
+    // document.getElementById("drawing-draw").value = drawing.draw || "evening";
     editingId = id;
     addDrawingButton.textContent = "Update Drawing";
     document.getElementById("drawing-number").focus();
