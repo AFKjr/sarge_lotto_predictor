@@ -1,0 +1,18 @@
+# PDF lottery result files (import via UI, don't commit)
+*.pdf
+
+# Claude Code local config
+.claude/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
