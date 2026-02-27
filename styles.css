@@ -51,6 +51,9 @@ nav a.active {
 header {
     padding: calc(var(--spacing-unit) * 4) calc(var(--spacing-unit) * 5);
     border-bottom: 1px solid #222;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 header h1 {
@@ -58,6 +61,25 @@ header h1 {
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--color-accent);
+}
+
+.kofi-link {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 0.75);
+    background-color: #ff5e5b;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    padding: calc(var(--spacing-unit) * 0.75) calc(var(--spacing-unit) * 1.5);
+    border-radius: var(--border-radius);
+    white-space: nowrap;
+    transition: opacity 0.15s;
+}
+
+.kofi-link:hover {
+    opacity: 0.88;
 }
 
 main {
