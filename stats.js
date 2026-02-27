@@ -1,7 +1,27 @@
+let filterDraw = "all";
+
 function loadDrawings() {
     const stored = localStorage.getItem("drawings");
     if (!stored) return [];
     return JSON.parse(stored);
+}
+
+function getFilteredDrawings(drawings) {
+    if (filterDraw === "all") return drawings;
+    return drawings.filter(function(d) { return d.draw === filterDraw; });
+}
+
+function handleFilterDraw(draw) {
+    filterDraw = draw;
+    const filterButtons = document.querySelectorAll(".filter-button");
+    for (let i = 0; i < filterButtons.length; i++) {
+        if (filterButtons[i].getAttribute("data-draw") === draw) {
+            filterButtons[i].classList.add("active");
+        } else {
+            filterButtons[i].classList.remove("active");
+        }
+    }
+    renderStats();
 }
 
 function calculateDigitFrequency(drawings) {
@@ -58,7 +78,7 @@ function sortByFrequency(freqMap) {
 }
 
 function renderStats() {
-    const drawings = loadDrawings();
+    const drawings = getFilteredDrawings(loadDrawings());
     const statsEmpty = document.getElementById("stats-empty");
     const digitFrequencySection = document.getElementById("digit-frequency");
     const topStraightSection = document.getElementById("top-straight");
@@ -137,6 +157,13 @@ function createFreqItem(number, count) {
     item.appendChild(numSpan);
     item.appendChild(countSpan);
     return item;
+}
+
+const filterButtons = document.querySelectorAll(".filter-button");
+for (let i = 0; i < filterButtons.length; i++) {
+    filterButtons[i].addEventListener("click", function() {
+        handleFilterDraw(this.getAttribute("data-draw"));
+    });
 }
 
 renderStats();

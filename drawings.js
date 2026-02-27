@@ -4,9 +4,11 @@ const importFile = document.getElementById("import-file");
 const importPdfFile = document.getElementById("import-pdf-file");
 
 let editingId = null;
-let filterDraw = "evening";
+let filterDraw = "all";
 let filterDateFrom = "";
 let filterDateTo = "";
+let currentPage = 1;
+const PAGE_SIZE = 20;
 
 addDrawingButton.addEventListener("click", handleAddDrawing);
 exportButton.addEventListener("click", handleExport);
@@ -22,16 +24,19 @@ for (let i = 0; i < filterButtons.length; i++) {
 
 document.getElementById("filter-date-from").addEventListener("change", function() {
     filterDateFrom = this.value;
+    currentPage = 1;
     renderDrawings(loadDrawings());
 });
 
 document.getElementById("filter-date-to").addEventListener("change", function() {
     filterDateTo = this.value;
+    currentPage = 1;
     renderDrawings(loadDrawings());
 });
 
 function handleFilterDraw(draw) {
     filterDraw = draw;
+    currentPage = 1;
     for (let i = 0; i < filterButtons.length; i++) {
         if (filterButtons[i].getAttribute("data-draw") === draw) {
             filterButtons[i].classList.add("active");
@@ -45,10 +50,10 @@ function handleFilterDraw(draw) {
 function handleAddDrawing() {
     const numberInput = document.getElementById("drawing-number");
     const dateInput = document.getElementById("drawing-date");
-    // const drawSelect = document.getElementById("drawing-draw");
+    const drawSelect = document.getElementById("drawing-draw");
     const number = numberInput.value.trim();
     const date = dateInput.value;
-    const draw = "evening"; // const draw = drawSelect.value;
+    const draw = drawSelect.value;
 
     if (!isValidDrawingNumber(number)) {
         showError("Please enter a valid 3-digit number.");
@@ -124,7 +129,7 @@ function handleEditDrawing(id) {
 
     document.getElementById("drawing-number").value = drawing.number;
     document.getElementById("drawing-date").value = drawing.date;
-    // document.getElementById("drawing-draw").value = drawing.draw || "evening";
+    document.getElementById("drawing-draw").value = drawing.draw || "evening";
     editingId = id;
     addDrawingButton.textContent = "Update Drawing";
     document.getElementById("drawing-number").focus();
@@ -343,9 +348,7 @@ function parseCash3Pdf(pages) {
 
             if (digits.length !== 3) continue;
 
-            if (draw === "evening") {
-                results.push({ number: digits.join(""), date: date, draw: draw });
-            }
+            results.push({ number: digits.join(""), date: date, draw: draw });
         }
     }
 
@@ -414,6 +417,7 @@ function renderDrawings(drawings) {
         list.textContent = drawings.length === 0
             ? "No drawings recorded yet."
             : "No drawings match the current filter.";
+        renderPagination(0);
         return;
     }
 
@@ -423,8 +427,16 @@ function renderDrawings(drawings) {
         return getDrawOrder(b.draw) - getDrawOrder(a.draw);
     });
 
-    for (let i = 0; i < sorted.length; i++) {
-        const drawing = sorted[i];
+    const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
+    if (currentPage > totalPages) { currentPage = totalPages; }
+    if (currentPage < 1) { currentPage = 1; }
+    const pageStart = (currentPage - 1) * PAGE_SIZE;
+    const paginated = sorted.slice(pageStart, pageStart + PAGE_SIZE);
+
+    renderPagination(sorted.length);
+
+    for (let i = 0; i < paginated.length; i++) {
+        const drawing = paginated[i];
 
         const item = document.createElement("div");
         item.className = "drawing-item";
@@ -470,6 +482,43 @@ function renderDrawings(drawings) {
         item.appendChild(actions);
         list.appendChild(item);
     }
+}
+
+function renderPagination(total) {
+    const controls = document.getElementById("pagination-controls");
+    controls.innerHTML = "";
+
+    if (total <= PAGE_SIZE) { return; }
+
+    const totalPages = Math.ceil(total / PAGE_SIZE);
+
+    const prevButton = document.createElement("button");
+    prevButton.type = "button";
+    prevButton.className = "filter-button";
+    prevButton.textContent = "← Prev";
+    prevButton.disabled = currentPage === 1;
+    prevButton.addEventListener("click", function() {
+        currentPage--;
+        renderDrawings(loadDrawings());
+    });
+
+    const label = document.createElement("span");
+    label.className = "page-label";
+    label.textContent = "Page " + currentPage + " of " + totalPages;
+
+    const nextButton = document.createElement("button");
+    nextButton.type = "button";
+    nextButton.className = "filter-button";
+    nextButton.textContent = "Next →";
+    nextButton.disabled = currentPage === totalPages;
+    nextButton.addEventListener("click", function() {
+        currentPage++;
+        renderDrawings(loadDrawings());
+    });
+
+    controls.appendChild(prevButton);
+    controls.appendChild(label);
+    controls.appendChild(nextButton);
 }
 
 function createEditHandler(id) {

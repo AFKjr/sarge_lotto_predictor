@@ -418,6 +418,26 @@ select option {
     color: #ff5555;
 }
 
+#pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--spacing-unit) * 1);
+    padding-top: calc(var(--spacing-unit) * 2);
+}
+
+#pagination-controls .page-label {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    min-width: 80px;
+    text-align: center;
+}
+
+#pagination-controls .filter-button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
 /* Stats page */
 
 #stats-section {
