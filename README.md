@@ -49,6 +49,6 @@ Open `index.html` in any modern browser. No build step or internet connection re
 
 - Vanilla JavaScript (ES5-compatible, no frameworks)
 - [PDF.js](https://mozilla.github.io/pdf.js/) (v3.11.174) for PDF text extraction
-- `localStorage` for persistent data storage
+- IndexedDB for persistent data storage (falls back to `localStorage` if unavailable)
 - Inter font via Google Fonts
 - CSS custom properties for theming

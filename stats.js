@@ -1,11 +1,5 @@
 let filterDraw = "all";
 
-function loadDrawings() {
-    const stored = localStorage.getItem("drawings");
-    if (!stored) return [];
-    return JSON.parse(stored);
-}
-
 function getFilteredDrawings(drawings) {
     if (filterDraw === "all") return drawings;
     return drawings.filter(function(d) { return d.draw === filterDraw; });
@@ -166,4 +160,4 @@ for (let i = 0; i < filterButtons.length; i++) {
     });
 }
 
-renderStats();
+initDrawingStore().then(renderStats);

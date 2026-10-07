@@ -8,7 +8,7 @@ Sarge's Pick 3 Analyzer: a static, browser-only tool for Georgia Lottery **Cash 
 
 ## Architecture
 
-Three independent pages, each with its own script. There are no modules or shared JS files; each script loads with a plain `<script>` tag at the end of `<body>`:
+Three pages, each with its own script. There are no modules; scripts load with plain `<script>` tags at the end of `<body>` and share globals. `storage.js` is the only shared script, loaded before `drawings.js` and `stats.js`:
 
 | Page | Script | Role |
 |---|---|---|
@@ -19,9 +19,11 @@ Three independent pages, each with its own script. There are no modules or share
 `styles.css` is shared by all pages and uses CSS custom properties for theming. The nav and footer (disclaimer, Ko-fi link) are copied by hand into each HTML file, so a change to either must be made in all three files.
 
 ### Data flow
-- The only persistent state is the `localStorage` key `"drawings"`, a JSON array of `{ id, number, date, draw }`. `number` is a 3-digit string, `date` is `YYYY-MM-DD`, and `draw` is one of `"midday" | "evening" | "night"` (lowercase).
-- `drawings.js` and `stats.js` each define their own `loadDrawings()`, `getFilteredDrawings()`, and `handleFilterDraw()`. The two versions differ: the `drawings.js` one backfills a missing `id`/`draw` (defaulting to `"evening"`) and also filters by date range. If you change the data shape, update both files.
-- Duplicates are detected by `(date, draw)` (`isDuplicate` in `drawings.js`). Imports merge and never overwrite existing entries.
+- The only persistent state is a list of drawings `{ id, number, date, draw }`, stored in IndexedDB (database `sarge-pick3`, object store `drawings`, keyed by `id`). `number` is a 3-digit string, `date` is `YYYY-MM-DD`, and `draw` is one of `"midday" | "evening" | "night"` (lowercase).
+- `storage.js` owns all persistence. `initDrawingStore()` must resolve before anything reads data; each page's last line starts it and renders afterwards. It then keeps an in-memory copy, so `loadDrawings()` is synchronous and returns a copy. `saveDrawings(list)` replaces the whole store in one transaction and returns a promise. `drawings.js` calls it through `storeDrawings()`, which shows an error if the save fails.
+- Migration: on first run, if IndexedDB is empty and the old `localStorage` key `"drawings"` exists, its data is copied in and the old key is renamed to `"drawings-legacy-backup"`. If IndexedDB can't be opened, storage falls back to the `localStorage` key `"drawings"`.
+- `drawings.js` and `stats.js` each define their own `getFilteredDrawings()` and `handleFilterDraw()`. The `drawings.js` version also filters by date range.
+- Duplicates are detected by `(date, draw)` (`isDuplicate` in `drawings.js`). PDF import merges and skips existing entries; JSON import replaces everything after a confirm prompt.
 - Cross-page link: clicking a number in the drawings list goes to `index.html?number=XYZ`, which `readQueryParams()` in `main.js` reads to pre-fill the calculator.
 
 ### PDF import (`parseCash3Pdf` in `drawings.js`)

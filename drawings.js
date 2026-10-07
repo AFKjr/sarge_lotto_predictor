@@ -89,7 +89,7 @@ function handleAddDrawing() {
     }
 
     clearError();
-    saveDrawings(drawings);
+    storeDrawings(drawings);
     renderDrawings(drawings);
     numberInput.value = "";
     dateInput.value = "";
@@ -112,7 +112,7 @@ function isDuplicate(drawings, date, draw) {
 function handleDeleteDrawing(id) {
     let drawings = loadDrawings();
     drawings = drawings.filter(function(d) { return d.id !== id; });
-    saveDrawings(drawings);
+    storeDrawings(drawings);
     renderDrawings(drawings);
 }
 
@@ -174,7 +174,7 @@ function handleImport(event) {
                 }
             }
             clearError();
-            saveDrawings(imported);
+            storeDrawings(imported);
             renderDrawings(imported);
         } catch (err) {
             showError("Failed to parse JSON file.");
@@ -216,7 +216,7 @@ function handlePdfImport(event) {
                     added++;
                 }
             }
-            saveDrawings(drawings);
+            storeDrawings(drawings);
             renderDrawings(drawings);
             clearError();
             if (added === 0) {
@@ -388,23 +388,11 @@ function getFilteredDrawings(drawings) {
     });
 }
 
-function loadDrawings() {
-    const stored = localStorage.getItem("drawings");
-    if (!stored) return [];
-    const drawings = JSON.parse(stored);
-    for (let i = 0; i < drawings.length; i++) {
-        if (!drawings[i].id) {
-            drawings[i].id = Date.now() + i;
-        }
-        if (!drawings[i].draw) {
-            drawings[i].draw = "evening";
-        }
-    }
-    return drawings;
-}
-
-function saveDrawings(drawings) {
-    localStorage.setItem("drawings", JSON.stringify(drawings));
+function storeDrawings(drawings) {
+    saveDrawings(drawings).catch(function(err) {
+        console.error(err);
+        showError("Could not save drawings. Export a backup and try reloading the page.");
+    });
 }
 
 function renderDrawings(drawings) {
@@ -551,4 +539,6 @@ function clearError() {
     el.className = "";
 }
 
-renderDrawings(loadDrawings());
+initDrawingStore().then(function() {
+    renderDrawings(loadDrawings());
+});
