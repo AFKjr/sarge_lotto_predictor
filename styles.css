@@ -179,7 +179,8 @@ select option {
 
 /* Drawings page */
 
-#drawings-section {
+#drawings-section,
+#tickets-section {
     background-color: var(--color-surface);
     border: 1px solid #222;
     border-radius: var(--border-radius);
@@ -191,7 +192,8 @@ select option {
     gap: calc(var(--spacing-unit) * 3);
 }
 
-#drawings-section h2 {
+#drawings-section h2,
+#tickets-section h2 {
     font-size: 1rem;
     font-weight: 600;
     color: var(--color-text-secondary);
@@ -199,13 +201,15 @@ select option {
     letter-spacing: 0.08em;
 }
 
-#add-drawing {
+#add-drawing,
+#add-ticket {
     display: flex;
     flex-direction: column;
     gap: calc(var(--spacing-unit) * 2);
 }
 
-#add-drawing-button {
+#add-drawing-button,
+#add-ticket-button {
     width: 100%;
     background-color: var(--color-accent);
     color: #000000;
@@ -219,22 +223,26 @@ select option {
     transition: opacity 0.15s ease;
 }
 
-#add-drawing-button:hover {
+#add-drawing-button:hover,
+#add-ticket-button:hover {
     opacity: 0.88;
 }
 
-#drawings-error {
+#drawings-error,
+#tickets-error {
     font-size: 0.875rem;
     color: #ff5555;
     min-height: 1.25rem;
 }
 
-#drawing-actions {
+#drawing-actions,
+#ticket-actions {
     display: flex;
     gap: calc(var(--spacing-unit) * 2);
 }
 
-#export-button {
+#export-button,
+#export-tickets-button {
     flex: 1;
     background-color: transparent;
     color: var(--color-text-primary);
@@ -248,16 +256,19 @@ select option {
     transition: border-color 0.15s ease;
 }
 
-#export-button:hover {
+#export-button:hover,
+#export-tickets-button:hover {
     border-color: var(--color-text-secondary);
 }
 
-#import-file {
+#import-file,
+#import-tickets-file {
     display: none;
 }
 
 #import-pdf-label,
-#import-label {
+#import-label,
+#import-tickets-label {
     flex: 1;
     display: flex;
     align-items: center;
@@ -277,7 +288,8 @@ select option {
 }
 
 #import-pdf-label:hover,
-#import-label:hover {
+#import-label:hover,
+#import-tickets-label:hover {
     border-color: var(--color-text-secondary);
 }
 
@@ -337,7 +349,8 @@ select option {
     margin-bottom: calc(var(--spacing-unit) * 0.5);
 }
 
-#drawings-list {
+#drawings-list,
+#tickets-list {
     display: flex;
     flex-direction: column;
     gap: calc(var(--spacing-unit) * 1);
@@ -458,6 +471,121 @@ select option {
 #pagination-controls .filter-button:disabled {
     opacity: 0.35;
     cursor: default;
+}
+
+/* Tickets page */
+
+.form-row {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 2);
+}
+
+.form-row > div {
+    flex: 1;
+    min-width: 0;
+}
+
+#ticket-summary {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: calc(var(--spacing-unit) * 1);
+    border-top: 1px solid #222;
+    padding-top: calc(var(--spacing-unit) * 3);
+}
+
+.summary-stat {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 0.5);
+    padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
+    background-color: var(--color-background);
+    border: 1px solid #222;
+    border-radius: var(--border-radius);
+}
+
+.summary-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.summary-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.summary-value.summary-positive {
+    color: var(--color-accent);
+}
+
+.summary-value.summary-negative {
+    color: #ff5555;
+}
+
+.summary-note {
+    grid-column: 1 / -1;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+.summary-note:empty {
+    display: none;
+}
+
+.ticket-main {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 0.25);
+    flex-shrink: 0;
+}
+
+.ticket-main .drawing-draw {
+    white-space: nowrap;
+}
+
+.drawing-item.ticket-won {
+    border-color: var(--color-accent);
+}
+
+.ticket-won .ticket-status {
+    color: var(--color-accent);
+}
+
+.ticket-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+#tickets-list .drawing-meta {
+    text-align: right;
+    margin-left: auto;
+    padding-left: calc(var(--spacing-unit) * 1.5);
+    margin-right: calc(var(--spacing-unit) * 1.5);
+}
+
+@media (max-width: 520px) {
+    #tickets-list .drawing-item {
+        flex-wrap: wrap;
+        row-gap: calc(var(--spacing-unit) * 1);
+    }
+
+    #tickets-list .drawing-delete-button {
+        margin-left: auto;
+    }
+
+    #tickets-list .drawing-meta {
+        order: 3;
+        flex-basis: 100%;
+        align-items: flex-start;
+        text-align: left;
+        margin: 0;
+        padding-left: 0;
+    }
 }
 
 /* Footer */

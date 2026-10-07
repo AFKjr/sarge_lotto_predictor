@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pick 3 Stats</title>
+    <title>Pick 3 Tickets</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -18,47 +18,73 @@
     <nav>
         <a href="index.html">Calculator</a>
         <a href="drawings.html">Drawings</a>
-        <a href="stats.html" class="active">Stats</a>
-        <a href="tickets.html">Tickets</a>
+        <a href="stats.html">Stats</a>
+        <a href="tickets.html" class="active">Tickets</a>
     </nav>
 
     <main>
-        <section id="stats-section">
-            <h2>Statistics</h2>
+        <section id="tickets-section">
+            <h2>My Tickets</h2>
 
-            <div id="filter-bar">
-                <div id="filter-draw">
-                    <button type="button" class="filter-button active" data-draw="all">All</button>
-                    <button type="button" class="filter-button" data-draw="midday">Midday</button>
-                    <button type="button" class="filter-button" data-draw="evening">Evening</button>
-                    <button type="button" class="filter-button" data-draw="night">Night</button>
+            <div id="add-ticket">
+                <div id="ticket-number-input">
+                    <label for="ticket-number">Number</label>
+                    <input type="text" id="ticket-number" maxlength="3" placeholder="e.g. 378">
                 </div>
+
+                <div class="form-row">
+                    <div>
+                        <label for="ticket-bet">Bet Type</label>
+                        <select id="ticket-bet">
+                            <option value="straight">Straight</option>
+                            <option value="box">Box</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="ticket-cost">Amount</label>
+                        <select id="ticket-cost">
+                            <option value="0.5">$0.50</option>
+                            <option value="1" selected>$1.00</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div>
+                        <label for="ticket-date">Date</label>
+                        <input type="date" id="ticket-date">
+                    </div>
+                    <div>
+                        <label for="ticket-draw">Draw</label>
+                        <select id="ticket-draw">
+                            <option value="midday">Midday</option>
+                            <option value="evening" selected>Evening</option>
+                            <option value="night">Night</option>
+                        </select>
+                    </div>
+                </div>
+
+                <p id="tickets-error"></p>
+
+                <button type="button" id="add-ticket-button">Add Ticket</button>
             </div>
 
-            <p id="stats-empty"></p>
+            <div id="ticket-summary"></div>
 
-            <div id="digit-frequency">
-                <h3>Digit Frequency</h3>
-                <p class="stats-subtitle">Hot digits appear most often. Cold digits appear least often.</p>
-                <div id="digit-grid"></div>
+            <div id="ticket-actions">
+                <button type="button" id="export-tickets-button">Export JSON</button>
+                <label for="import-tickets-file" id="import-tickets-label">Import JSON</label>
+                <input type="file" id="import-tickets-file" accept=".json">
             </div>
 
-            <div id="top-straight">
-                <h3>Top Straight Numbers</h3>
-                <div id="straight-list"></div>
-            </div>
-
-            <div id="top-box">
-                <h3>Top Box Combinations</h3>
-                <p class="stats-subtitle">Digits sorted — e.g. "378" and "837" both count as "378".</p>
-                <div id="box-list"></div>
-            </div>
+            <div id="tickets-list"></div>
+            <div id="pagination-controls"></div>
 
         </section>
     </main>
 
     <script src="storage.js"></script>
-    <script src="stats.js"></script>
+    <script src="tickets.js"></script>
 
     <footer>
         <div id="footer-content">

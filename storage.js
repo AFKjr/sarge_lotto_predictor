@@ -1,55 +1,70 @@
-// Drawing storage shared by drawings.js and stats.js.
-// Drawings live in IndexedDB. A copy is kept in memory so pages can read them
-// synchronously once initDrawingStore() has resolved. If IndexedDB is unavailable,
-// storage falls back to localStorage so the app keeps working.
+// Storage shared by the Drawings, Stats and Tickets pages.
+// Drawings and tickets live in IndexedDB. A copy of each is kept in memory so pages
+// can read them synchronously once initStore() has resolved. If IndexedDB is
+// unavailable, storage falls back to localStorage so the app keeps working.
 
 const DB_NAME = "sarge-pick3";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const DRAWINGS_STORE = "drawings";
-const LEGACY_KEY = "drawings";
+const TICKETS_STORE = "tickets";
+const LEGACY_DRAWINGS_KEY = "drawings";
 const LEGACY_BACKUP_KEY = "drawings-legacy-backup";
 
-let drawingsCache = [];
+const cache = { drawings: [], tickets: [] };
 let database = null;
 let useLocalStorage = false;
 
-function initDrawingStore() {
+function initStore() {
     if (navigator.storage && navigator.storage.persist) {
         navigator.storage.persist();
     }
 
     return openDatabase().then(function(db) {
         database = db;
-        return readAllDrawings();
-    }).then(function(drawings) {
-        if (drawings.length === 0 && localStorage.getItem(LEGACY_KEY)) {
-            return migrateFromLocalStorage();
+        return Promise.all([readAll(DRAWINGS_STORE), readAll(TICKETS_STORE)]);
+    }).then(function(results) {
+        cache.tickets = results[1];
+        if (results[0].length === 0 && localStorage.getItem(LEGACY_DRAWINGS_KEY)) {
+            return migrateDrawingsFromLocalStorage();
         }
-        drawingsCache = normalizeDrawings(drawings);
+        cache.drawings = normalizeDrawings(results[0]);
     }).catch(function(err) {
         console.error("IndexedDB unavailable, using localStorage instead.", err);
         useLocalStorage = true;
-        drawingsCache = normalizeDrawings(readLegacyDrawings());
+        cache.drawings = normalizeDrawings(readLocalStorage(DRAWINGS_STORE));
+        cache.tickets = readLocalStorage(TICKETS_STORE);
     });
 }
 
 function loadDrawings() {
-    return drawingsCache.slice();
+    return cache.drawings.slice();
 }
 
 function saveDrawings(drawings) {
-    drawingsCache = drawings.slice();
+    return saveAll(DRAWINGS_STORE, drawings);
+}
+
+function loadTickets() {
+    return cache.tickets.slice();
+}
+
+function saveTickets(tickets) {
+    return saveAll(TICKETS_STORE, tickets);
+}
+
+function saveAll(storeName, items) {
+    cache[storeName] = items.slice();
 
     if (useLocalStorage) {
         try {
-            localStorage.setItem(LEGACY_KEY, JSON.stringify(drawingsCache));
+            localStorage.setItem(storeName, JSON.stringify(cache[storeName]));
             return Promise.resolve();
         } catch (err) {
             return Promise.reject(err);
         }
     }
 
-    return writeAllDrawings(drawingsCache);
+    return writeAll(storeName, cache[storeName]);
 }
 
 function openDatabase() {
@@ -64,16 +79,25 @@ function openDatabase() {
             if (!db.objectStoreNames.contains(DRAWINGS_STORE)) {
                 db.createObjectStore(DRAWINGS_STORE, { keyPath: "id" });
             }
+            if (!db.objectStoreNames.contains(TICKETS_STORE)) {
+                db.createObjectStore(TICKETS_STORE, { keyPath: "id" });
+            }
         };
-        request.onsuccess = function() { resolve(request.result); };
+        request.onsuccess = function() {
+            const db = request.result;
+            // Let a newer version of the app open in another tab upgrade the database.
+            db.onversionchange = function() { db.close(); };
+            resolve(db);
+        };
         request.onerror = function() { reject(request.error); };
+        request.onblocked = function() { reject(new Error("Database upgrade blocked by another open tab")); };
     });
 }
 
-function readAllDrawings() {
+function readAll(storeName) {
     return new Promise(function(resolve, reject) {
-        const request = database.transaction(DRAWINGS_STORE, "readonly")
-            .objectStore(DRAWINGS_STORE)
+        const request = database.transaction(storeName, "readonly")
+            .objectStore(storeName)
             .getAll();
         request.onsuccess = function() { resolve(request.result); };
         request.onerror = function() { reject(request.error); };
@@ -81,13 +105,13 @@ function readAllDrawings() {
 }
 
 // Replaces the whole store in one transaction, so a failed save leaves the previous data intact.
-function writeAllDrawings(drawings) {
+function writeAll(storeName, items) {
     return new Promise(function(resolve, reject) {
-        const tx = database.transaction(DRAWINGS_STORE, "readwrite");
-        const store = tx.objectStore(DRAWINGS_STORE);
+        const tx = database.transaction(storeName, "readwrite");
+        const store = tx.objectStore(storeName);
         store.clear();
-        for (let i = 0; i < drawings.length; i++) {
-            store.put(drawings[i]);
+        for (let i = 0; i < items.length; i++) {
+            store.put(items[i]);
         }
         tx.oncomplete = function() { resolve(); };
         tx.onerror = function() { reject(tx.error); };
@@ -95,19 +119,19 @@ function writeAllDrawings(drawings) {
     });
 }
 
-// One-time move of data saved by older versions of the app. The old copy is kept
-// under a backup key rather than deleted.
-function migrateFromLocalStorage() {
-    const drawings = normalizeDrawings(readLegacyDrawings());
-    return writeAllDrawings(drawings).then(function() {
-        localStorage.setItem(LEGACY_BACKUP_KEY, localStorage.getItem(LEGACY_KEY));
-        localStorage.removeItem(LEGACY_KEY);
-        drawingsCache = drawings;
+// One-time move of drawings saved by older versions of the app. The old copy is
+// kept under a backup key rather than deleted.
+function migrateDrawingsFromLocalStorage() {
+    const drawings = normalizeDrawings(readLocalStorage(DRAWINGS_STORE));
+    return writeAll(DRAWINGS_STORE, drawings).then(function() {
+        localStorage.setItem(LEGACY_BACKUP_KEY, localStorage.getItem(LEGACY_DRAWINGS_KEY));
+        localStorage.removeItem(LEGACY_DRAWINGS_KEY);
+        cache.drawings = drawings;
     });
 }
 
-function readLegacyDrawings() {
-    const stored = localStorage.getItem(LEGACY_KEY);
+function readLocalStorage(key) {
+    const stored = localStorage.getItem(key);
     if (!stored) return [];
     return JSON.parse(stored);
 }

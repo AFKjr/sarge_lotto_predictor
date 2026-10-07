@@ -20,6 +20,12 @@ A browser-based tool for tracking and analyzing Georgia Lottery **Cash 3** (Pick
 - Import / Export as JSON for backup and restore
 - Click any drawing number to pre-fill the Calculator
 
+### Tickets
+- Log the tickets you play: number, Straight or Box, $0.50 or $1, date and draw
+- Each ticket is checked against the drawings you've entered and shows as won (with the prize), no win, or waiting for result
+- Summary of total spent, total won, net, and winning tickets, plus what the odds say you'd expect to net
+- Import / Export tickets as JSON for backup and restore
+
 ### Stats
 - Digit frequency grid (0–9) with **hot** (top 3) and **cold** (bottom 3) indicators
 - Top 10 most-drawn straight numbers

@@ -539,6 +539,6 @@ function clearError() {
     el.className = "";
 }
 
-initDrawingStore().then(function() {
+initStore().then(function() {
     renderDrawings(loadDrawings());
 });

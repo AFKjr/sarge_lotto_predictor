@@ -160,4 +160,4 @@ for (let i = 0; i < filterButtons.length; i++) {
     });
 }
 
-initDrawingStore().then(renderStats);
+initStore().then(renderStats);
